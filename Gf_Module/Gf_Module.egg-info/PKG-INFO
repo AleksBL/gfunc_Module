@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: Gf_Module
+Version: 0.1
+Summary: Module for building electronic Greens functions
+Home-page: 
+Author: Aleksander Bach Lorentzen
+Author-email: abalo@dtu.dk
+License: MIT
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: tqdm
+Requires-Dist: Block_matrices
+Requires-Dist: scipy
