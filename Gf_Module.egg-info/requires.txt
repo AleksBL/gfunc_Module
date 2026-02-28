@@ -1,5 +1,0 @@
-numpy
-matplotlib
-tqdm
-Block_matrices
-scipy
