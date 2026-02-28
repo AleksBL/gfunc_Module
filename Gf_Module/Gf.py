@@ -610,10 +610,10 @@ class Greens_function_olead:
         if eidx is None:
             ne = self.ne
             energy_idx=[i for i in range(ne)]
+            print
         else:
             ne = len(eidx)
             energy_idx = [i for i in eidx]
-        
         n_elecs = self.n_elecs
         H  = self.H
         Ov = self.S
@@ -895,7 +895,7 @@ def read_SE_from_tbtrans(filename, sort = False, dtype = np.complex64):
     return SE, SE_inds
 
 def read_overlap_data(tbt, SE_inds, Dev, Hd, Sd):
-    geom      = tbt.geom
+    geom      = tbt.geometry
     kp, nk    = tbt.k, len(tbt.k)
     elec_inds = Dev.elec_inds
     elec_orbs = [np.hstack([np.arange(geom.a2o(i),geom.a2o(i+1)) 
