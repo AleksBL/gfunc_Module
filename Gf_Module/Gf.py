@@ -167,7 +167,7 @@ class Greens_function:
                 hk  =  H.Hk(spin = spin, k = k)
             if Ov is not None:
                 sk = Ov.Sk(k = k)
-                print('Using S = S')
+                print('S is not I, using S = S_inp')
                 if i == 0:
                     print('\n Overlap Included!\n')
             else:
@@ -681,11 +681,11 @@ class Greens_function_olead:
                 hk  =  H.Hk(spin = spin, k = k)
             if Ov is not None:
                 sk = Ov.Sk(k = k)
-                print('Using S = S')
-                if i == 0:
-                    print('\n Overlap Included!\n')
+                print('Overlap given, using S=S_inp')
+                # if i == 0:
+                #    print('\n Overlap Included!\n')
             else:
-                print('Using S = I')
+                print('Using S = I, no overlap given')
                 sk = I
             hk = hk.astype(np.complex128)
             sk = sk.astype(np.complex128)
@@ -901,7 +901,8 @@ def read_overlap_data(tbt, SE_inds, Dev, Hd, Sd):
     elec_orbs = [np.hstack([np.arange(geom.a2o(i),geom.a2o(i+1)) 
                             for i in ei]) 
                  for ei in elec_inds]
-    HS_elec   = [e.read_TSHS()  for e in Dev.elecs]
+    # print(elec_orbs)
+    # HS_elec   = [e.read_TSHS()  for e in Dev.elecs]
     rsse_mesg = '---> Hello! <--- \n' \
                +'It seems like you have used the a real-space self energy! good for you.\n'\
                +'This does however mean you need to compute a  rigid shift in the energy-levels in the Hamiltonian!\n'\
@@ -944,6 +945,12 @@ def read_overlap_data(tbt, SE_inds, Dev, Hd, Sd):
         Sdk = Sd.Sk(k = kpnt)
         for ie in range(len(Dev.elecs)):
             idx_D, idx_E = SE_inds[ie], elec_orbs[ie]
+            if len(np.intersect1d(idx_D, idx_E))>0:
+                print("WARNING: Inside Gf_Module.Gf.read_overlap_data: \n\
+                      -> Your device indices and electrode indices are overlapping. \n\
+                      -> This indicates you did not start this calculation using TBtrans.\n \
+                      -> You are strongly recommended to calculate the lead-device orthogonalization corrections yourself!!\n \
+                      -> The ones calculated here are most likely wrong given this information.")
             H_D_l = Hdk[idx_D,:][:, idx_E].toarray()
             S_D_l = Sdk[idx_D,:][:, idx_E].toarray()
             Sinv_ll = orth_lead[ie].calc_Sinv(kpnt,  10)
@@ -994,6 +1001,7 @@ def pivot_and_sub(SigList, pivot, idxD, no):
 class ortho_lead:
     def __init__(self, HS, direc):
         Hm, Sm           = sisl2array_min(HS.transform(orthogonal=False))
+        
         self.Hm, self.Sm = Hm, Sm
         self.HS          = HS
         self.no = Hm.shape[-1]
@@ -1052,7 +1060,7 @@ class ortho_lead:
                 res += ibtd.Block(nblocks-1, k) @ mat @ ibtd.Block(l, nblocks-1)
         return res
     def converge_Sinv_Hl_Sinv(self, kvec, tol = 1e-6, 
-                              maxcount = 25, fail_on_break = True):
+                              maxcount = 50, fail_on_break = True):
         nb   = 3
         diff = tol * 10.0
         count = 1
@@ -1064,6 +1072,7 @@ class ortho_lead:
             nb    += 1
             if count>maxcount:
                 print('didnt converge the inverse of the overlap matrix :( ')
+                print("diff = " + str(diff))
                 if fail_on_break:
                     assert 1 == 0
                 break
